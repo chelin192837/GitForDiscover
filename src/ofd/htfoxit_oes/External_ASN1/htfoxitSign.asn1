@@ -1,0 +1,60 @@
+-- 电子签章ASN1数据类型声明文件
+-- 本文件中定义的类型通过asn1c可转换为C/C++可识别的类型
+-- http://lionet.info/asn1c/compiler.html <version: asn1c-0.9.21>
+
+ElectronicStamp DEFINITIONS ::=BEGIN
+	SES-Signature::= SEQUENCE{
+		toSign					TBS-Sign,						--待电子签章数据
+		signature				BIT STRING						--电子签章中签名值
+	}
+	TBS-Sign::= SEQUENCE{
+		version					INTEGER,						--版本信息
+		esealInfo				SESeal,							--电子印章
+		timeInfo				BIT STRING,						--签章时间信息
+		dataHash				BIT STRING,						--原文杂凑值
+		propertyInfo			IA5String,						--原文数据的属性信息
+		cert					OCTET STRING,					--签章人对应的签名证书
+		signatureAlgorighm		OBJECT IDENTIFIER				--签名算法标识
+	}
+    SESeal::= SEQUENCE{
+        esealInfo 				SES-SealInfo,					--印章信息
+        signInfo 				SES-SignInfo					--制章人对印章签名的信息
+    }
+	SES-SealInfo::= SEQUENCE{
+		header					SES-Header,						--头信息
+		esID					IA5String,							--电子印章标识，电子印章数据的唯一标识编码
+		property				SES-ESPropertyInfo,				--电子印章属性信息
+		picture					SES-ESPictureInfo,				--电子印章图片数据
+		extDatas				ExtensionDatas					--自定义数据
+	}
+	ExtensionDatas::= SEQUENCE SIZE (0..MAX) OF ExtData
+	ExtData::= SEQUENCE{
+		extnID					OBJECT IDENTIFIER,				--自定义扩展字段标识
+		critical				BOOLEAN DEFAULT FALSE,			--自定义扩展字段是否关键
+		extnValue				OCTET STRING					--自定义扩展字段数据值
+	}
+	SES-Header::= SEQUENCE{
+		id						IA5String,						--电子印章数据标识
+		version					INTEGER,						--电子印章数据版本号标识
+		vid						IA5String						--电子印章厂商ID
+	}
+	SES-ESPropertyInfo::= SEQUENCE{
+		type					INTEGER,						--印章类型
+		name					UTF8String,						--印章名称
+		certList				SEQUENCE OF OCTET STRING,		--签章人证书列表
+		createDate				UTCTime,						--印章制作日期
+		validStart				UTCTime,						--印章有效起始日期
+		validEnd				UTCTime							--印章有效终止日期
+	}
+	SES-ESPictureInfo::= SEQUENCE{
+		type					IA5String,						--图片类型
+		data					OCTET STRING,					--图片数据
+		with					INTEGER,						--图片显示宽度
+		height					INTEGER							--图片显示高度
+	}
+	SES-SignInfo::= SEQUENCE{
+		cert					OCTET STRING,					--制章人签名证书
+		signatureAlgorighm		OBJECT IDENTIFIER,				--签名算法标识
+		signData				BIT STRING						--制章人的签名值
+	}
+END
